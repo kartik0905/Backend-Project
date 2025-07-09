@@ -3,12 +3,6 @@ import { ApiError } from "../utils/APIErrors.js";
 import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import express from 'express'
-
-const app = express();
-
-app.use(express.json()); // ✅ this enables req.body for JSON
-app.use(express.urlencoded({ extended: true })); // optional: for form submissions
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
