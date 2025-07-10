@@ -151,8 +151,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -223,7 +223,7 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
   if (!(newPassword === confPassword)) {
     throw new ApiError(
       400,
-      "THe password does not matches with the new password"
+      "The password does not matches with the new password"
     );
   }
 
@@ -255,22 +255,31 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = User.findById(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
-        fullname: fullname,
-        email: email,
+        fullname,
+        email,
       },
     },
     { new: true }
   ).select("-password");
 
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        user.toObject(),
+        "Account details updated successfully"
+      )
+    );
 });
-
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -328,6 +337,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
+
   if (!username?.trim()) {
     throw new ApiError(400, "Username is missing");
   }
@@ -335,7 +345,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   const channel = await User.aggregate([
     {
       $match: {
-        username: username?.toLowerCase(),
+        username: username.toLowerCase(),
       },
     },
     {
@@ -356,14 +366,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        subscribersCount: {
-          $size: "$subscribers",
-        },
-        channelsSubscribedToCount: {
-          $size: "$subscriberdTo",
-        },
+        subscribersCount: { $size: "$subscribers" },
+        channelsSubscribedToCount: { $size: "$subscriberdTo" },
         isSubscribed: {
-          $condition: {
+          $cond: {
             if: { $in: [req.user?._id, "$subscribers.subscriber"] },
             then: true,
             else: false,
@@ -449,8 +455,6 @@ const getWatchHistory = asyncHandler(async (req, res) => {
       )
     );
 });
-
-
 
 export {
   registerUser,
