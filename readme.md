@@ -69,6 +69,13 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 All routes have been tested with **Postman**. You can import the collection and start playing around.
 
+## 🌐 Deployment
+
+This backend is live and deployed on Render:
+[Video-Tube](https://video-tube-fmq4.onrender.com)
+(You no longer need to run the server locally — just use this live URL in your frontend or Postman).
+
+
 ## 💻 Contributions
 
 Feel free to raise issues or submit PRs to improve the project.
