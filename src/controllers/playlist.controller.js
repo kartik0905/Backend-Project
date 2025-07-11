@@ -1,6 +1,6 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Playlist } from "../models/playlist.model.js";
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -66,11 +66,12 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   if (!isPlaylistExist) {
     throw new ApiError(404, "Playlist does not exist");
   }
+  const { Types } = mongoose;
 
   const playlistVideos = await Playlist.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(playlistId),
+        _id: Types.ObjectId(playlistId),
       },
     },
     {

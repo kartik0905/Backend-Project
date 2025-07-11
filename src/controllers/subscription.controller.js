@@ -1,7 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { User } from "../models/user.model.js";
+import { User } from "../models/user.models.js";
 import { Subscription } from "../models/subscription.model.js";
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -54,10 +54,11 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     throw new ApiError(404, "channel not found with this channel id");
   }
 
+  const { Types } = mongoose;
   const subscriberList = await Subscription.aggregate([
     {
       $match: {
-        channel: new mongoose.Types.ObjectId(channelId),
+        channel: Types.ObjectId(channelId),
       },
     },
     {
@@ -119,10 +120,14 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     throw new ApiError(404, "subscriber not found with this subscriber id");
   }
 
+  const { Types } = mongoose;
+
+
+
   const channelList = await Subscription.aggregate([
     {
       $match: {
-        subscriber: new mongoose.Types.ObjectId(subscriberId),
+        subscriber: Types.ObjectId(subscriberId),
       },
     },
     {

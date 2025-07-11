@@ -1,7 +1,7 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Video } from "../models/video.model.js";
-import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
+import { Video } from "../models/video.models.js";
+import { User } from "../models/user.models.js";
+import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -100,6 +100,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
   );
 });
 
+const { Types } = mongoose;
+
+ 
+
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   if (!videoId) {
@@ -108,7 +112,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   const fullVideo = await Video.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(videoId),
+        _id: Types.ObjectId(videoId)  
       },
     },
     {
