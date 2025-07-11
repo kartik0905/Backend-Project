@@ -12,10 +12,12 @@ const getChannelStats = asyncHandler(async (req, res) => {
   stats.totalVideo = 0;
   stats.totalLikes = 0;
 
+  const {Types} = mongoose;
+
   const views = await Video.aggregate([
     {
       $match: {
-        owner: new mongoose.Types.ObjectId(req.user?.id),
+        owner: new Types.ObjectId(req.user?.id),
       },
     },
     {
@@ -63,7 +65,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   const videos = await Video.aggregate([
     {
       $match: {
-        owner: Types.ObjectId(req.user?._id)  
+        owner: new Types.ObjectId(req.user?._id)  
       },
     },
     {
@@ -75,9 +77,9 @@ const getChannelVideos = asyncHandler(async (req, res) => {
         pipeline: [
           {
             $project: {
-              $username: 1,
-              $fullname: 1,
-              $avatar: 1,
+              username: 1,
+              fullname: 1,
+              avatar: 1,
             },
           },
         ],
@@ -99,7 +101,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(
-      new ApiResponse(200, { videos }, "All videos are fetched successfully")
+      new ApiResponse(200, { videos }, "All videos are fetched in dashboard successfully")
     );
 });
 

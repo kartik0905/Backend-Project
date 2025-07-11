@@ -4,7 +4,11 @@ import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadFile,
+  deleteFile,
+  uploadVideoFile,
+} from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -102,8 +106,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const { Types } = mongoose;
 
- 
-
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   if (!videoId) {
@@ -112,7 +114,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   const fullVideo = await Video.aggregate([
     {
       $match: {
-        _id: Types.ObjectId(videoId)  
+        _id: new Types.ObjectId(videoId),
       },
     },
     {
@@ -161,6 +163,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+  const { title, description } = req.body;
   if (!videoId) {
     throw new ApiError(400, "video id is not provided");
   }
