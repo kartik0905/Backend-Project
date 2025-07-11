@@ -3,6 +3,8 @@ import { Playlist } from "../models/playlist.model.js";
 import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Video } from "../models/video.models.js";
+import { User } from "../models/user.models.js";
 
 const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
@@ -71,7 +73,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   const playlistVideos = await Playlist.aggregate([
     {
       $match: {
-        _id: Types.ObjectId(playlistId),
+        _id: new Types.ObjectId(playlistId),
       },
     },
     {
@@ -212,24 +214,28 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   if (!playlistId) {
     throw new ApiError(400, "playlist id is required");
   }
+
   const playlist = await Playlist.findById(playlistId);
   if (!playlist) {
     throw new ApiError(404, "playlist not found");
   }
+
   if (String(req.user?.id) !== String(playlist.owner)) {
-    throw new ApiError(403, "unauthorized to perform video removal acion");
+    throw new ApiError(403, "unauthorized to perform video removal action");
   }
 
-  const videos = Playlist.videos.filter((vd) => String(vd) !== String(videoId));
+  const videos = playlist.videos.filter((vd) => String(vd) !== String(videoId));
   playlist.videos = videos;
+
   await playlist.save();
+
   res
     .status(200)
     .json(
       new ApiResponse(
         200,
         { playlist },
-        "Video removed from playlist succesfully"
+        "Video removed from playlist successfully"
       )
     );
 });

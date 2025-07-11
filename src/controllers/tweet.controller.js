@@ -10,7 +10,7 @@ const createTweet = asyncHandler(async (req, res) => {
   if (!(content || content.trim())) {
     throw new ApiError(400, "Cannot add a blank tweet");
   }
-
+  
   const tweet = await Tweet.create({
     content: content.trim(),
     owner: req.user?.id,
@@ -35,7 +35,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
   const userTweets = await Tweet.aggregate([
     {
       $match: {
-        owner: Types.ObjectId(userId),
+        owner: new Types.ObjectId(userId),
       },
     },
     {

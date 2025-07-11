@@ -4,24 +4,31 @@ import { Subscription } from "../models/subscription.model.js";
 import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
+
   if (!channelId) {
     throw new ApiError(400, "Channel id required");
   }
 
   if (String(channelId) === String(req.user?._id)) {
-    throw new ApiError(400, "User cannot subscribe to hs own channel");
+    throw new ApiError(400, "User cannot subscribe to his own channel");
   }
 
   const isChannelExist = await User.exists({ _id: channelId });
   if (!isChannelExist) {
-    throw new ApiError(404, "channel with this id does not exist");
+    throw new ApiError(404, "Channel with this id does not exist");
   }
 
-  const subscription = await User.exists({ _id: channelId });
+  const subscription = await Subscription.findOne({
+    channel: channelId,
+    subscriber: req.user?.id,
+  });
+
   let isSubscribed;
+
   if (!subscription) {
     await Subscription.create({
       channel: channelId,
@@ -29,16 +36,17 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     });
     isSubscribed = true;
   } else {
-    await subscription.deleteOne();
+    await Subscription.deleteOne({ _id: subscription._id });
     isSubscribed = false;
   }
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
         {},
-        `channel has been ${isSubscribed ? "subscribed" : "unsubscribed"} successfully`
+        `Channel has been ${isSubscribed ? "subscribed" : "unsubscribed"} successfully`
       )
     );
 });
@@ -58,7 +66,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const subscriberList = await Subscription.aggregate([
     {
       $match: {
-        channel: Types.ObjectId(channelId),
+        channel: new Types.ObjectId(channelId),
       },
     },
     {
@@ -112,22 +120,17 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
+
   if (!subscriberId) {
     throw new ApiError(400, "subscriber id is required");
-  }
-  const isSubscriberExist = await User.findById(subscriberId);
-  if (!isSubscriberExist) {
-    throw new ApiError(404, "subscriber not found with this subscriber id");
   }
 
   const { Types } = mongoose;
 
-
-
   const channelList = await Subscription.aggregate([
     {
       $match: {
-        subscriber: Types.ObjectId(subscriberId),
+        subscriber: new Types.ObjectId(subscriberId),
       },
     },
     {
@@ -140,7 +143,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
           {
             $project: {
               username: 1,
-              fullName: 1,
+              fullname: 1,
               avatar: 1,
             },
           },
@@ -156,7 +159,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     {
       $addFields: {
         username: "$channelInfo.username",
-        fullName: "$channelInfo.fullName",
+        fullName: "$channelInfo.fullname",
         avatar: "$channelInfo.avatar",
       },
     },
@@ -168,13 +171,14 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
   res
     .status(200)
     .json(
       new ApiResponse(
         200,
         { subscriber: channelList },
-        "all channel details subscribed by the subscriber are fetched successfully"
+        "All channel details subscribed by the subscriber are fetched successfully"
       )
     );
 });

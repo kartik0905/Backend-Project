@@ -3,6 +3,9 @@ import { Like } from "../models/likes.model.js";
 import { ApiError } from "../utils/APIErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Video } from "../models/video.models.js";
+import { Comment } from "../models/comment.model.js";
+import { Tweet } from "../models/tweet.model.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
   let likedStatus;
@@ -20,7 +23,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
       likedBy: req.user?._id,
       video: videoId,
     });
-    likedStatus = liked;
+    likedStatus = "Liked";
   } else {
     await like.deleteOne();
     likedStatus = "Unliked";
@@ -43,7 +46,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Comment Id required");
   }
   const isCommentIdExist = await Comment.exists({ _id: commentId });
-  if (!isCommentExist) {
+  if (!isCommentIdExist) {
     throw new ApiError(404, "comment not found with this comment id");
   }
 
@@ -82,7 +85,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Tweet ID required");
   }
 
-  const isTweetExist = await tweetId.exists({ _id: tweetId });
+  const isTweetExist = await Tweet.exists({ _id: tweetId });
   if (!isTweetExist) {
     throw new ApiError(404, "Tweet not exist");
   }
@@ -122,7 +125,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   const likedVideos = await Like.aggregate([
     {
       $match: {
-        likedBy: Types.ObjectId(req.user?._id),
+        likedBy: new Types.ObjectId(req.user?._id),
         video: { $exists: true, $ne: null },
       },
     },
