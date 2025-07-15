@@ -1,4 +1,4 @@
-# 📽️ Full Stack Video Platform Backend
+# 📽️ VideoTube – Full Stack Video Platform Backend
 
 A powerful backend for a full-fledged video-sharing platform built with Node.js, Express, MongoDB, and Cloudinary. It handles everything from user authentication to video uploads, playlists, likes, subscriptions, and much more.
 
@@ -20,6 +20,7 @@ A powerful backend for a full-fledged video-sharing platform built with Node.js,
 - **JWT** for authentication
 - **Multer** for file handling
 - **Postman** for API testing
+- **Render** for backend hosting
 
 ## 🗂️ Folder Structure
 
@@ -56,7 +57,7 @@ npm run dev
 Create a `.env` file in the root with the following:
 
 ```env
-PORT=5000
+PORT=8000
 MONGODB_URI=your_mongodb_uri
 ACCESS_TOKEN_SECRET=your_access_token_secret
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
@@ -71,9 +72,15 @@ All routes have been tested with **Postman**. You can import the collection and 
 
 ## 🌐 Deployment
 
-This backend is live and deployed on Render:
-[Video-Tube](https://video-tube-fmq4.onrender.com)
-(You no longer need to run the server locally — just use this live URL in your frontend or Postman).
+This backend is live and deployed on **Render**:  
+🔗 [VideoTube](https://video-tube-fmq4.onrender.com)
+
+You can use this live URL in your frontend or Postman to interact with the API — no local setup needed.
+
+## 📷 Screenshots
+
+### Healthcheck Endpoint (GET /api/v1/healthcheck)
+![Healthcheck](./screenshots/healthcheck.png)
 
 
 ## 💻 Contributions
